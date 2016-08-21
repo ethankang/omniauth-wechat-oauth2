@@ -39,8 +39,14 @@ module OmniAuth
 
       def request_phase
         params = client.auth_code.authorize_params.merge(redirect_uri: callback_url).merge(authorize_params).merge(appid: options[:appid])
-        params["component_appid"] = params.delete("client_id")
-        redirect client.authorize_url(params)
+        component_appid = params.delete("client_id")
+        query = params.to_options.sort.map do |key, value|
+          "#{key}=#{value}"
+        end.join('&')
+        query = "#{query}&component_appid=#{component_appid}#wechat_redirect"
+        url =  "https://open.weixin.qq.com/connect/oauth2/authorize?#{query}"
+        redirect url
+#         redirect client.authorize_url(params)
       end
 
       def raw_info
